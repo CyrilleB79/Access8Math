@@ -341,7 +341,11 @@ class MathMlReaderInteraction(mathPres.MathInteractionNVDAObject):
 	def script_navigate(self, gesture):
 		r = False
 		if gesture.mainKeyName in ["downArrow", "upArrow", "leftArrow", "rightArrow", "home"]:
-			r = self.mathcontent.navigate(gesture.mainKeyName)
+			if gesture.mainKeyName != "home" and set(gesture.modifierNames) == set(['alt', 'control']):
+				table = True
+			else:
+				table = False
+			r = self.mathcontent.navigate(gesture.mainKeyName, table)
 
 		if r:
 			api.setReviewPosition(self.makeTextInfo(), False)
