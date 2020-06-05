@@ -126,17 +126,39 @@ class MathContent(object):
 		set_mathrule_allnode(self.root, self.mathrule)
 		check_type_allnode(self.root)
 
-	def navigate(self, action):
+	def navigate(self, action, table=False):
 		pointer = None
-		if action == "downArrow":
-			pointer = self.pointer.down()
-		elif action == "upArrow":
-			pointer = self.pointer.up()
-		elif action == "leftArrow":
-			pointer = self.pointer.previous_sibling
-		elif action == "rightArrow":
-			pointer = self.pointer.next_sibling
-		elif action == "home":
+		moved = None
+		tmpPointer = self.pointer
+		if table:
+			try:
+				if tmpPointer.name == 'mtable':
+					moved = True
+					pointer = tmpPointer.down().down()
+				elif tmpPointer.name == 'mtr':
+					moved = True
+					pointer = tmpPointer.down()
+				elif action in ["downArrow", "upArrow"]:
+					moved = True
+					while tmpPointer.name != 'mtd':
+						tmpPointer = tmpPointer.parent
+					index = tmpPointer.index_in_parent()
+					if action == "upArrow":
+						pointer = tmpPointer.parent.previous_sibling.child[index]
+					else:
+						pointer = tmpPointer.parent.next_sibling.child[index]
+			except AttributeError:
+				pointer = None
+		if not moved:
+			if action == "downArrow":
+				pointer = tmpPointer.down()
+			elif action == "upArrow":
+				pointer = tmpPointer.up()
+			elif action == "leftArrow":
+				pointer = tmpPointer.previous_sibling
+			elif action == "rightArrow":
+				pointer = tmpPointer.next_sibling
+		if action == "home":
 			pointer = self.root
 
 		if pointer is not None:
